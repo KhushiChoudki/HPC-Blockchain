@@ -1,0 +1,47 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Node
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Spark / Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.pnp
+.pnp.js
+.venv
+venv/
+ENV/
+env/
+.env
+
+# Project specific
+middleware/blockchain_data.json
+.gemini/
+tmp/
+*.tex
+job_output.log
+tmp.json
+final_debug.log
+ingestion_run.log
