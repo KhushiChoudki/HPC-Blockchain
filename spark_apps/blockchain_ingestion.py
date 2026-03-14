@@ -29,7 +29,8 @@ def get_polygon_block(block_number):
                 "timestamp": int(b['timestamp'], 16),
                 "gasUsed": int(b['gasUsed'], 16),
                 "hash": b['hash'],
-                "tx_count": len(b['transactions']) if 'transactions' in b else 0
+                "tx_count": len(b['transactions']) if 'transactions' in b else 0,
+                "transactions": [tx['hash'] for tx in b['transactions'][:10]] if 'transactions' in b and isinstance(b['transactions'][0], dict) else (b['transactions'][:10] if 'transactions' in b else [])
             }
     except Exception as e:
         print(f"Error fetching polygon block {block_number}: {e}")
@@ -46,7 +47,8 @@ def get_fabric_block(block_number):
                 "timestamp": b['metadata']['timestamp'],
                 "gasUsed": b['metadata']['gasUsed'],
                 "hash": b['header']['data_hash'],
-                "tx_count": len(b['data']['data'])
+                "tx_count": len(b['data']['data']),
+                "transactions": [tx.get('tx_id', f"0x{os.urandom(32).hex()}") for tx in b['data']['data'][:10]]
             }
     except Exception as e:
         print(f"Error fetching fabric block {block_number}: {e}")

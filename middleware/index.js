@@ -151,6 +151,7 @@ app.post('/simulate', (req, res) => {
             gasUsed: Math.floor(Math.random() * (isFabric ? 200000 : 500000)) + (isFabric ? 50000 : 0),
             hash: "0x" + Math.random().toString(16).slice(2) + Math.random().toString(16).slice(2),
             tx_count: Math.floor(Math.random() * 50),
+            transactions: Array.from({ length: Math.floor(Math.random() * 5) + 1 }, () => "0x" + Math.random().toString(16).slice(2) + Math.random().toString(16).slice(2)),
             chain: isFabric ? "hyperledger" : "polygon",
             type: "SIMULATED"
         });

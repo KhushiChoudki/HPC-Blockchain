@@ -15,6 +15,7 @@ ChartJS.register(
 
 const App = () => {
     const [data, setData] = useState([]);
+    const [expandedBlock, setExpandedBlock] = useState(null);
     const [nodes, setNodes] = useState({ polygon: 2, hyperledger: 1 });
     const [loading, setLoading] = useState(true);
     const [syncing, setSyncing] = useState(false);
@@ -195,24 +196,65 @@ const App = () => {
                 <div className="glass-card" style={{ overflowY: 'auto', maxHeight: '600px' }}>
                     <h3 style={{ marginBottom: '1rem' }}>Multi-Chain Stream</h3>
                     {data.map((item, idx) => (
-                        <div key={idx} style={{ padding: '1rem 0', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <div>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                    {item.chain === 'polygon' ? (
-                                        <span style={{ background: 'rgba(130, 71, 229, 0.2)', color: '#a87ffb', padding: '2px 6px', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 'bold' }}>POLYGON</span>
-                                    ) : (
-                                        <span style={{ background: 'rgba(47, 103, 246, 0.2)', color: '#689bff', padding: '2px 6px', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 'bold' }}>FABRIC</span>
-                                    )}
-                                    <p style={{ fontWeight: '700' }}>Block #{item.number}</p>
+                        <div key={idx} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                            <div
+                                onClick={() => setExpandedBlock(expandedBlock === item.hash ? null : item.hash)}
+                                style={{ padding: '1rem 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', transition: 'background 0.2s' }}
+                                onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.03)'}
+                                onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                            >
+                                <div>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                        {item.chain === 'polygon' ? (
+                                            <span style={{ background: 'rgba(130, 71, 229, 0.2)', color: '#a87ffb', padding: '2px 6px', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 'bold' }}>POLYGON</span>
+                                        ) : (
+                                            <span style={{ background: 'rgba(47, 103, 246, 0.2)', color: '#689bff', padding: '2px 6px', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 'bold' }}>FABRIC</span>
+                                        )}
+                                        <p style={{ fontWeight: '700', userSelect: 'none' }}>Block #{item.number}</p>
+                                    </div>
+                                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', marginTop: '4px' }}>{item.hash.substring(0, 18)}...</p>
                                 </div>
-                                <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', marginTop: '4px' }}>{item.hash.substring(0, 18)}...</p>
-                            </div>
-                            <div style={{ textAlign: 'right' }}>
-                                <p style={{ color: 'var(--accent-color)', fontWeight: '600' }}>{item.tx_count} TXs</p>
-                                <div className="verified-badge" style={{ fontSize: '0.75rem', borderColor: item.chain === 'polygon' ? '#8247e5' : '#2f67f6', color: item.chain === 'polygon' ? '#8247e5' : '#2f67f6' }}>
-                                    Verified
+                                <div style={{ textAlign: 'right', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                    <div>
+                                        <p style={{ color: 'var(--accent-color)', fontWeight: '600', userSelect: 'none' }}>{item.tx_count} TXs</p>
+                                        <div className="verified-badge" style={{ fontSize: '0.75rem', borderColor: item.chain === 'polygon' ? '#8247e5' : '#2f67f6', color: item.chain === 'polygon' ? '#8247e5' : '#2f67f6' }}>
+                                            Verified
+                                        </div>
+                                    </div>
+                                    <div style={{ color: 'var(--text-secondary)', transform: expandedBlock === item.hash ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }}>
+                                        ▼
+                                    </div>
                                 </div>
                             </div>
+                            {expandedBlock === item.hash && (
+                                <div style={{ padding: '0.5rem 1rem 1rem 1rem', fontSize: '0.85rem', color: 'var(--text-secondary)', background: 'rgba(0,0,0,0.2)' }}>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                                        <div><strong style={{ color: '#fff' }}>Full Hash:</strong> <span style={{ fontFamily: 'monospace', wordBreak: 'break-all' }}>{item.hash}</span></div>
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+                                            <div><strong style={{ color: '#fff' }}>Gas Used:</strong> {item.gasUsed ? item.gasUsed.toLocaleString() : 'N/A'}</div>
+                                            <div><strong style={{ color: '#fff' }}>Timestamp:</strong> {new Date(item.timestamp * 1000).toLocaleString()}</div>
+                                        </div>
+                                        {item.transactions && item.transactions.length > 0 && (
+                                            <div style={{ marginTop: '0.5rem' }}>
+                                                <strong style={{ color: '#fff', display: 'block', marginBottom: '0.4rem' }}>Transaction Hashes (Top {item.transactions.length}):</strong>
+                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                                    {item.transactions.map((tx, i) => (
+                                                        <a
+                                                            key={i}
+                                                            href={item.chain === 'polygon' ? `https://amoy.polygonscan.com/tx/${tx}` : '#'}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            style={{ color: 'var(--accent-color)', textDecoration: 'none', fontFamily: 'monospace', fontSize: '0.75rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}
+                                                        >
+                                                            {tx}
+                                                        </a>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     ))}
                     {data.length === 0 && !loading && (
